@@ -1,0 +1,6 @@
+login
+standard
+John Doe
+withdrawal
+12345
+100.00
