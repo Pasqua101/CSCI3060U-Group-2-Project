@@ -1,4 +1,4 @@
 Welcome to the Banking System.
 Accepted admin login.
-Account creation recorded.
+Error: Account name 'Jane Smith' already exists.
 Session terminated.

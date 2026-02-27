@@ -1,1 +1,4 @@
 Welcome to the Banking System.
+Error: should only be accepted when logged in 
+Accepted standard login.
+Session terminated.

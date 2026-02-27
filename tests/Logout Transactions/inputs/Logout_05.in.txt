@@ -1,0 +1,5 @@
+login
+standard
+User1
+logout
+This extra text should be ignored

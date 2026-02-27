@@ -1,1 +1,4 @@
 Welcome to the Banking System.
+Accepted standard login.
+Error: Privileged transaction - only accepted when logged in admin mode
+Session terminated.

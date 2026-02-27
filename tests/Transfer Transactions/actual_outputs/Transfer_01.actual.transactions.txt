@@ -1,1 +1,4 @@
 Welcome to the Banking System.
+Accepted standard login.
+Transfer successfully recorded.
+Session terminated.

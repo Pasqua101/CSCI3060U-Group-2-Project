@@ -1,0 +1,4 @@
+Welcome to the Banking System.
+Accepted standard login.
+Session terminated.
+Invalid transaction code: this extra text should be ignored

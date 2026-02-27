@@ -1,0 +1,8 @@
+login
+standard
+John Doe
+paybill
+00001
+TV
+1000.01
+logout

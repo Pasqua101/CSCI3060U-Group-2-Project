@@ -1,0 +1,3 @@
+Welcome to the Banking System.
+Error: Invalid login mode 'guest'. Only 'standard' or 'admin' accepted.
+Error: should only be accepted when logged in 

@@ -88,10 +88,24 @@ class FrontEndApp:
         if self.session.is_logged_in:
             print("Error: Already logged in.")
             return
-        
+
         mode = self.input_source.readline().strip().lower() 
-        user = self.input_source.readline().strip() if mode == "standard" else "Admin"
+        if not Validators.validate_mode(mode):
+            print(f"Error: Invalid login mode '{mode}'. Only 'standard' or 'admin' accepted.")
+            return
+
+        name = self.input_source.readline().strip()
+
+        # Handle name validation based on mode
+        if mode == "standard":
+            if not Validators.validate_name(name):
+                print("Error: Invalid username. Must be 1-20 characters and not empty.")
+                return
+            user = name
+        else:
+            user = name if name else "Admin"
         
+        # Use the updated session login to store the user
         self.session.login(mode, user)
         self.account_manager.load_current_accounts(self.accounts_path)
         print(f"Accepted {mode} login.")
@@ -102,30 +116,76 @@ class FrontEndApp:
         INTENTION: To collect withdrawal data and record it as a valid 
                    session transaction for later processing.
         """
-        if not self._check_login():
-            self.input_source.readline() 
-            self.input_source.readline() 
+
+        if not self.session.is_logged_in:
+            print("Error: withdrawal only accepted when logged in.")
             return
 
-        acc_num = self.input_source.readline().strip()
-        amount = float(self.input_source.readline().strip())
-        
-        self.tx_manager.add(Transaction("01", self.session.current_user, acc_num, amount))
-        print("Withdrawal processed.")
+        account_num = self.input_source.readline().strip()
+        amount_str = self.input_source.readline().strip()
+
+
+        if account_num not in self.account_manager.accounts_by_number:
+            print(f"Error: Account number {account_num} not found.")
+            return
+
+        try:
+            amount = float(amount_str)
+
+            if not Validators.validate_amount(amount):
+                print("Error: Invalid withdrawal amount.")
+                return
+
+            if self.session.mode == "standard" and amount > 500.00:
+                print("Error: Standard users cannot withdraw more than $500.00.")
+                return
+
+            account = self.account_manager.accounts_by_number[account_num]
+            if amount > account.balance:
+                print("Error: Insufficient funds.")
+                return
+
+            self.tx_manager.add(Transaction("01", account.holder, account_num, amount))
+            print("Withdrawal successful.")
+
+        except ValueError:
+            print("Error: Amount must be numeric.")
 
     def create_transaction(self):
         """
         Privileged: Creates a new bank account.
         INTENTION: To record an account creation request in the transaction file.
         """
+
         if not self._check_login(admin_required=True):
             self.input_source.readline() 
             self.input_source.readline() 
             return
 
         name = self.input_source.readline().strip()
-        balance = float(self.input_source.readline().strip())
+        balance_str = self.input_source.readline().strip()
         
+
+        if not Validators.validate_name(name):
+            print("Error: Invalid name length (Must be 1-20 characters).")
+            return
+
+
+        existing_names = [acc.holder for acc in self.account_manager.accounts_by_number.values()]
+        if name in existing_names:
+            print(f"Error: Account name '{name}' already exists.")
+            return
+
+        try:
+            balance = float(balance_str)
+
+            if not Validators.validate_amount(balance):
+                print("Error: Invalid initial balance.")
+                return
+        except ValueError:
+            print("Error: Balance must be a numeric value.")
+            return
+
         self.tx_manager.add(Transaction("05", name, "00000", balance))
         print("Account creation recorded.")
 
@@ -151,14 +211,49 @@ class FrontEndApp:
                    destination account, capturing both account numbers and the amount.
         INTERFACE: Reads source account, destination account, and amount from input.
         """
-        if not self._check_login():
-            for _ in range(3): self.input_source.readline()
+
+        if not self.session.is_logged_in:
+            print("Error: transfer only accepted when logged in.")
             return
-        from_acc = self.input_source.readline().strip()
-        to_acc = self.input_source.readline().strip()
-        amount = float(self.input_source.readline().strip())
-        self.tx_manager.add(Transaction("02", self.session.current_user, from_acc, amount, to_acc[:2]))
-        print("Transfer processed.")
+
+        from_account_num = self.input_source.readline().strip()
+        to_account_num = self.input_source.readline().strip()
+        amount_str = self.input_source.readline().strip()
+
+        accounts = self.account_manager.accounts_by_number
+        if from_account_num not in accounts or to_account_num not in accounts:
+            print("Error: One or both account numbers are invalid.")
+            return
+
+        from_acc = accounts[from_account_num]
+        to_acc = accounts[to_account_num]
+
+        if from_acc.status != 'A' or to_acc.status != 'A':
+            print("Error: Cannot transfer to or from a disabled/deleted account.")
+            return
+
+        try:
+            amount = float(amount_str)
+            if not Validators.validate_amount(amount):
+                print("Error: Invalid transfer amount.")
+                return
+
+            if self.session.mode == "standard" and amount > 1000.00:
+                print("Error: Standard users cannot transfer more than $1000.00.")
+                return
+
+            if amount > from_acc.balance:
+                print(f"Error: Insufficient funds in account {from_account_num}.")
+                return
+
+            self.tx_manager.add(Transaction("02", from_acc.holder, from_account_num, amount))
+            # Note: Some specs require a second record for the 'to' account
+            self.tx_manager.add(Transaction("02", to_acc.holder, to_account_num, amount))
+            
+            print("Transfer successfully recorded.")
+
+        except ValueError:
+            print("Error: Amount must be numeric.")
 
     def paybill_transaction(self):
         """
@@ -167,14 +262,50 @@ class FrontEndApp:
                    utility or service provider.
         INTERFACE: Reads account number, company name, and amount from input.
         """
-        if not self._check_login():
-            for _ in range(3): self.input_source.readline()
+        if not self.session.is_logged_in:
+            print("Error: paybill only accepted when logged in.")
             return
-        acc_num = self.input_source.readline().strip()
-        company = self.input_source.readline().strip()
-        amount = float(self.input_source.readline().strip())
-        self.tx_manager.add(Transaction("03", self.session.current_user, acc_num, amount, company[:2]))
-        print("Bill payment processed.")
+
+        account_num = self.input_source.readline().strip()
+        company_code = self.input_source.readline().strip().upper()
+        amount_str = self.input_source.readline().strip()
+
+        valid_companies = ["EC", "CQ", "TV"]
+        if company_code not in valid_companies:
+            print(f"Error: Invalid company code '{company_code}'. Must be EC, CQ, or TV.")
+            return
+        
+        account_num = account_num.zfill(5)
+
+        if account_num not in self.account_manager.accounts_by_number:
+            print(f"Error: Account number {account_num} not found.")
+            return
+
+        acc = self.account_manager.accounts_by_number[account_num]
+
+        if self.session.mode == "standard" and acc.holder != self.session.user:
+            print(f"Error: You are not authorized to pay bills from account {account_num}.")
+            return
+
+        try:
+            amount = float(amount_str)
+            if not Validators.validate_amount(amount):
+                print("Error: Invalid payment amount.")
+                return
+
+            if self.session.mode == "standard" and amount > 1000.00:
+                print("Error: Standard users cannot pay a bill over $1000.00.")
+                return
+
+            if amount > acc.balance:
+                print(f"Error: Insufficient funds in account {account_num}.")
+                return
+
+            self.tx_manager.add(Transaction("03", acc.holder, account_num, amount))
+            print(f"Bill payment to {company_code} successfully recorded.")
+
+        except ValueError:
+            print("Error: Amount must be numeric.")
 
     def deposit_transaction(self):
         """
@@ -182,14 +313,44 @@ class FrontEndApp:
         INTENTION: To record the addition of funds into a specified bank account.
         INTERFACE: Reads account number and deposit amount from input.
         """
-        if not self._check_login():
-            self.input_source.readline()
-            self.input_source.readline()
+        if not self.session.is_logged_in:
+            print("Error: deposit only accepted when logged in.")
             return
-        acc_num = self.input_source.readline().strip()
-        amount = float(self.input_source.readline().strip())
-        self.tx_manager.add(Transaction("04", self.session.current_user, acc_num, amount))
-        print("Deposit processed.")
+
+        account_num = self.input_source.readline().strip()
+        amount_str = self.input_source.readline().strip()
+
+        account_num = account_num.zfill(5)
+
+        if account_num not in self.account_manager.accounts_by_number:
+            print(f"Error: Account number {account_num} not found.")
+            return
+
+        acc = self.account_manager.accounts_by_number[account_num]
+
+        if acc.status != 'A':
+            print("Error: Cannot deposit into a disabled account.")
+            return
+
+        if self.session.mode == "standard" and acc.holder != self.session.user:
+            print(f"Error: Standard users can only deposit into their own account.")
+            return
+
+        try:
+            amount = float(amount_str)
+            if not Validators.validate_amount(amount):
+                print("Error: Invalid deposit amount.")
+                return
+
+            if self.session.mode == "standard" and amount > 1000.00:
+                print("Error: Standard users cannot deposit more than $1000.00.")
+                return
+
+            self.tx_manager.add(Transaction("04", acc.holder, account_num, amount))
+            print("Deposit successfully recorded.")
+
+        except ValueError:
+            print("Error: Amount must be numeric.")
 
     def delete_transaction(self):
         """
@@ -198,12 +359,29 @@ class FrontEndApp:
                    account from the system (Admin only).
         INTERFACE: Reads account holder name and account number from input.
         """
+
         if not self._check_login(admin_required=True):
             self.input_source.readline()
             self.input_source.readline()
             return
+
         name = self.input_source.readline().strip()
         acc_num = self.input_source.readline().strip()
+
+        if acc_num not in self.account_manager.accounts_by_number:
+            print(f"Error: Account number {acc_num} not found.")
+            return
+
+        acc = self.account_manager.accounts_by_number[acc_num]
+
+        if acc.holder != name:
+            print(f"Error: Name '{name}' does not match account {acc_num}.")
+            return
+
+        if acc.status != 'A':
+            print("Error: Account is already disabled or deleted.")
+            return
+
         self.tx_manager.add(Transaction("06", name, acc_num, 0.0))
         print("Account deletion recorded.")
 
@@ -214,12 +392,30 @@ class FrontEndApp:
                    performing further transactions (Admin only).
         INTERFACE: Reads account holder name and account number from input.
         """
+
         if not self._check_login(admin_required=True):
             self.input_source.readline()
             self.input_source.readline()
             return
+
         name = self.input_source.readline().strip()
         acc_num = self.input_source.readline().strip()
+
+
+        if acc_num not in self.account_manager.accounts_by_number:
+            print(f"Error: Account number {acc_num} not found.")
+            return
+
+        acc = self.account_manager.accounts_by_number[acc_num]
+
+        if acc.holder != name:
+            print(f"Error: Name '{name}' does not match holder of account {acc_num}.")
+            return
+
+        if acc.status != 'A':
+            print("Error: Account is already disabled or deleted.")
+            return
+
         self.tx_manager.add(Transaction("07", name, acc_num, 0.0))
         print("Account disabled.")
 
@@ -236,5 +432,36 @@ class FrontEndApp:
             return
         name = self.input_source.readline().strip()
         acc_num = self.input_source.readline().strip()
+        self.tx_manager.add(Transaction("08", name, acc_num, 0.0))
+        print("Account plan change recorded.")
+    
+    def changeplan_transaction(self):
+        """
+        Privileged: Changes the account payment plan.
+        INTENTION: Validates admin status, account existence, and status.
+        """
+
+        if not self._check_login(admin_required=True):
+            self.input_source.readline()
+            self.input_source.readline()
+            return
+
+        name = self.input_source.readline().strip()
+        acc_num = self.input_source.readline().strip()
+
+        if acc_num not in self.account_manager.accounts_by_number:
+            print(f"Error: Account {acc_num} not found.")
+            return
+
+        acc = self.account_manager.accounts_by_number[acc_num]
+
+        if acc.holder != name:
+            print(f"Error: Name '{name}' does not match holder of account {acc_num}.")
+            return
+
+        if acc.status != 'A':
+            print("Error: Cannot change plan on a disabled or deleted account.")
+            return
+
         self.tx_manager.add(Transaction("08", name, acc_num, 0.0))
         print("Account plan change recorded.")

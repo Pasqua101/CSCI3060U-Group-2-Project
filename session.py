@@ -18,7 +18,7 @@ class Session:
         """
         self.is_logged_in = False
         self.mode = None # standard or admin 
-        self.current_user = None
+        self.user = None # Renamed from current_user to match FrontEndApp expectations
         self.withdraw_total = 0.0 # Track for $500 limit 
 
     def login(self, mode, user=None):
@@ -30,7 +30,7 @@ class Session:
         """
         self.is_logged_in = True
         self.mode = mode
-        self.current_user = user
+        self.user = user # Set to match the FrontEndApp variable name
 
     def logout(self):
         """

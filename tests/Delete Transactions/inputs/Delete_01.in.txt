@@ -1,0 +1,7 @@
+login
+admin
+Admin
+delete
+John Doe
+00001
+logout

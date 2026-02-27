@@ -1,0 +1,7 @@
+login
+admin
+Admin
+delete
+Alex Lee
+00003
+logout

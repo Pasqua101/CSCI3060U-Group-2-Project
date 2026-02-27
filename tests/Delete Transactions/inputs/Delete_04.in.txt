@@ -1,0 +1,7 @@
+login
+admin
+Admin
+delete
+Jane Smith
+00001
+logout

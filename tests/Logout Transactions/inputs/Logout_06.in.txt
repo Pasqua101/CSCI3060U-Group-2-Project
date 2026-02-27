@@ -1,0 +1,4 @@
+login
+standard
+User1
+LOGOUT

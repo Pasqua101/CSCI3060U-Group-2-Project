@@ -1,0 +1,8 @@
+login
+standard
+John Doe
+transfer
+00002
+00004
+20.00
+logout

@@ -1,0 +1,4 @@
+Welcome to the Banking System.
+Accepted admin login.
+Error: Account 88888 not found.
+Session terminated.

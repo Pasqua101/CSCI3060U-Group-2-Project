@@ -1,1 +1,5 @@
 Welcome to the Banking System.
+Accepted admin login.
+Invalid transaction code: standard
+Invalid transaction code: johndoe
+Session terminated.

@@ -1,0 +1,7 @@
+login
+standard
+User1
+withdrawal
+99999
+20.00
+logout

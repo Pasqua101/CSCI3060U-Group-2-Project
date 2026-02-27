@@ -1,0 +1,4 @@
+Welcome to the Banking System.
+Accepted standard login.
+Error: Standard users can only deposit into their own account.
+Session terminated.

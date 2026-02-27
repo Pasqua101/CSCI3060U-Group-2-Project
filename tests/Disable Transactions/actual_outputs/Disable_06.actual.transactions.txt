@@ -1,1 +1,4 @@
 Welcome to the Banking System.
+Accepted admin login.
+Error: Account is already disabled or deleted.
+Session terminated.

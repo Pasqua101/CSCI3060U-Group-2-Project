@@ -1,1 +1,4 @@
 Welcome to the Banking System.
+Accepted standard login.
+Bill payment to EC successfully recorded.
+Session terminated.

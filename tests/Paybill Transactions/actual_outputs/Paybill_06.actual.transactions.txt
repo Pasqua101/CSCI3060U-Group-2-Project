@@ -1,1 +1,4 @@
 Welcome to the Banking System.
+Accepted standard login.
+Error: Standard users cannot pay a bill over $1000.00.
+Session terminated.

@@ -1,0 +1,7 @@
+login
+admin
+John Doe
+create
+EmptyAccount
+00000.00
+logout

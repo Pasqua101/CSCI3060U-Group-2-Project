@@ -1,1 +1,4 @@
 Welcome to the Banking System.
+Accepted standard login.
+Error: One or both account numbers are invalid.
+Session terminated.

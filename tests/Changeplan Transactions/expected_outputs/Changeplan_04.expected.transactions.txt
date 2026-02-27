@@ -1,0 +1,4 @@
+Welcome to the Banking System.
+Accepted admin login.
+Error: Name 'Jane Smith' does not match holder of account 00001.
+Session terminated.
