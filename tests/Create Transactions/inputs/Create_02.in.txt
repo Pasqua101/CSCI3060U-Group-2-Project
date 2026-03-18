@@ -1,7 +1,0 @@
-login
-standard
-User1
-create
-UnauthorizedUser
-1000.00
-logout

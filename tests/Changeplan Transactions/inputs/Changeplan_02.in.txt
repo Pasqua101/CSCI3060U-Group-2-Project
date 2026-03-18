@@ -1,7 +1,0 @@
-login
-standard
-John Doe
-changeplan
-John Doe
-00001
-logout

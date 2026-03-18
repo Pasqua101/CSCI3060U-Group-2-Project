@@ -1,7 +1,0 @@
-login
-standard
-Jane Smith
-deposit
-00002
-1000.01
-logout

@@ -1,3 +1,0 @@
-Welcome to the Banking System.
-Error: No transaction other than login should be accepted before a login
-Error: should only be accepted when logged in 

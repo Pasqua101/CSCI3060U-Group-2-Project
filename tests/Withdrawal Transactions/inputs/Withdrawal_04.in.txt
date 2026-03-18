@@ -1,7 +1,0 @@
-login
-admin
-John Doe
-withdrawal
-00001
-1000.00
-logout

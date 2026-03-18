@@ -1,7 +1,0 @@
-login
-admin
-John Doe
-create
-User1
-00200.00
-logout

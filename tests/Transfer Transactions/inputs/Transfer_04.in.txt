@@ -1,8 +1,0 @@
-login
-standard
-John Doe
-transfer
-00001
-00003
-50.00
-logout

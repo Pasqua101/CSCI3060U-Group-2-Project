@@ -1,4 +1,0 @@
-create
-NoLoginUser
-00100.00
-logout
