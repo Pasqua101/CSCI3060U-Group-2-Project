@@ -1,0 +1,4 @@
+Welcome to the Banking System.
+Accepted standard login.
+Error: Cannot deposit into a disabled account.
+Session terminated.

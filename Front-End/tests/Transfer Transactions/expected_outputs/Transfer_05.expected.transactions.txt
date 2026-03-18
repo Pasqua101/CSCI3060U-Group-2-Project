@@ -1,0 +1,4 @@
+Welcome to the Banking System.
+Accepted standard login.
+Error: Standard users cannot transfer more than $1000.00.
+Session terminated.

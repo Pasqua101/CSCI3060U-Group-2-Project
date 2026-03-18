@@ -1,0 +1,4 @@
+Welcome to the Banking System.
+Accepted standard login.
+Error: Account number 99999 not found.
+Session terminated.

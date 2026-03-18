@@ -1,0 +1,5 @@
+00001 John Doe             A 01050.00 0000 NP
+00002 Jane Smith           A 00050.00 0000 SP
+00003 Alex Lee             D 00200.00 0000 NP
+12345 User3                A 01000.00 0000 NP
+00000 END_OF_FILE          A 00000.00 0000 NP

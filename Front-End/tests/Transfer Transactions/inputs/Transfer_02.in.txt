@@ -1,0 +1,8 @@
+login
+standard
+Jane Smith
+transfer
+00002
+00001
+75.00
+logout

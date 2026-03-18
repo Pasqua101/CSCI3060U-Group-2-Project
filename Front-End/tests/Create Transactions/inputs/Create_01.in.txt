@@ -1,0 +1,7 @@
+login
+admin
+John Doe
+create
+Jane Smith
+500.00
+logout

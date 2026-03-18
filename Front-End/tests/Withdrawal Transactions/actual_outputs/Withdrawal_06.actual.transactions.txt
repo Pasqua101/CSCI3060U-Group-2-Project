@@ -1,0 +1,5 @@
+Welcome to the Banking System.
+Error: withdrawal only accepted when logged in.
+Invalid transaction code: 00001
+Invalid transaction code: 20.00
+Error: should only be accepted when logged in 
